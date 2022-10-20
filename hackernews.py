@@ -97,7 +97,8 @@ def main():
     # Get rid of single phrases
     hackernews_df = hackernews_df[hackernews_df['count'] > 1]
     hackernews_df.to_pickle(storage_file, compression='gzip')
-    open(HACKERNEWS_TIMESTAMP, 'w', encoding='utf-8').write(latest_timestamp_str)
+    with open(HACKERNEWS_TIMESTAMP, 'w', encoding='utf-8') as output_file:
+        output_file.write(latest_timestamp_str)
 
 
 if __name__ == '__main__':
