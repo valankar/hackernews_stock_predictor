@@ -14,6 +14,7 @@ STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
 PLOT_DIR = f'{Path.home()}/code/predictor/web'
 PREDICTIONS = f'{STORAGE_DIR}/predictions.pkl.gz'
 LOAD_MODEL = False
+PRINT_ONLY = False
 
 
 def load_data():
@@ -42,7 +43,8 @@ def make_model():
 
     multi_output_clf = LinearRegression()
     multi_output_clf.fit(preprocessing.scale(hackernews_df, axis=1), stocks_df)
-    dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
+    if not PRINT_ONLY:
+        dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
     return multi_output_clf
 
 
@@ -76,7 +78,10 @@ def main():
     # Remove any duplicate dates, keeping last.
     predictions_df = predictions_df[~predictions_df.index.duplicated(
         keep='last')]
-    predictions_df.to_pickle(PREDICTIONS)
+    if PRINT_ONLY:
+        print(predictions_df[::-1])
+    else:
+        predictions_df.to_pickle(PREDICTIONS)
 
 
 if __name__ == '__main__':
