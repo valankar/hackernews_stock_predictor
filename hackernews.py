@@ -70,8 +70,8 @@ def main():
     latest_timestamp_str = str(hackernews_df.index.max())
     # Start from last checkpoint
     if exists(HACKERNEWS_TIMESTAMP):
-        previous_timestamp = pd.Timestamp(
-            open(HACKERNEWS_TIMESTAMP, encoding='utf-8').read())
+        with open(HACKERNEWS_TIMESTAMP, encoding='utf-8') as input_file:
+            previous_timestamp = pd.Timestamp(input_file.read())
         hackernews_df = hackernews_df[hackernews_df.index > previous_timestamp]
         if len(hackernews_df) == 0:
             return
