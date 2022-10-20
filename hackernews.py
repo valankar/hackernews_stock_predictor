@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 """Download hackernews data into dataframe."""
 
-import string
+import re
 import subprocess
 from datetime import datetime
 from os.path import exists
 from pathlib import Path
 
 import pandas as pd
+from bs4 import BeautifulSoup
 from nltk import ngrams
 from nltk.corpus import stopwords
 
@@ -49,9 +50,10 @@ def sum_duplicates(dataframe):
 
 def split_sentence(sentence):
     """Split a sentence into phrases."""
-    text = sentence.text.translate(str.maketrans('', '', string.punctuation))
-    split_text = [word.lower() for word in text.split() if len(word) > 1]
-    split_text = [word for word in split_text if word not in STOPWORDS]
+    text = BeautifulSoup(sentence.text, features='html.parser').get_text()
+    text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
+    split_text = [word for word in text.split() if len(
+        word) > 1 and word not in STOPWORDS]
     phrases = []
     if len(split_text) < 2:
         return phrases
@@ -67,6 +69,8 @@ def main():
     hackernews_df = pd.read_csv(
         hackernews_csv, index_col=0, parse_dates=True,
         infer_datetime_format=True)
+    hackernews_df = hackernews_df[hackernews_df['text'] != '<null>']
+    hackernews_df['text'] = hackernews_df['text'].str.lower()
     latest_timestamp_str = str(hackernews_df.index.max())
     # Start from last checkpoint
     if exists(HACKERNEWS_TIMESTAMP):
