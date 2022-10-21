@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Download hackernews data into dataframe."""
 
+import glob
 import re
 import subprocess
 import warnings
@@ -15,8 +16,10 @@ from nltk.corpus import stopwords
 
 DOWNLOAD_DIR = f'{Path.home()}/code/predictor/downloads'
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
+STORAGE_FILE = f'{STORAGE_DIR}/hackernews.pkl.gz'
 HACKERNEWS_TIMESTAMP = f'{STORAGE_DIR}/hackernews-timestamp.txt'
 STEAMPIPE = f'{Path.home()}/bin/steampipe'
+IMPORT_ALL = False
 
 STOPWORDS = [word.lower() for word in stopwords.words('english')]
 
@@ -46,7 +49,7 @@ def sum_duplicates(dataframe):
         reset['date'] = column[1]
         reset = reset.set_index('date')
         day_dfs.append(reset)
-    return pd.concat(day_dfs).dropna()
+    return pd.concat(day_dfs).dropna().sort_index()
 
 
 def split_sentence(sentence):
@@ -66,15 +69,22 @@ def split_sentence(sentence):
 
 def main():
     """Main."""
-    hackernews_csv = download_hackernews()
-    hackernews_df = pd.read_csv(
-        hackernews_csv, index_col=0, parse_dates=True,
-        infer_datetime_format=True)
+    if IMPORT_ALL:
+        csv_files = sorted(glob.glob(f'{DOWNLOAD_DIR}/hackernews*.csv'))
+    else:
+        csv_files = [download_hackernews()]
+    dfs = []
+    for csv_file in csv_files:
+        dfs.append(pd.read_csv(
+            csv_file, index_col=0, parse_dates=True,
+            infer_datetime_format=True))
+    hackernews_df = pd.concat(dfs)
+
     hackernews_df = hackernews_df[hackernews_df['text'] != '<null>']
     hackernews_df['text'] = hackernews_df['text'].str.lower()
     latest_timestamp_str = str(hackernews_df.index.max())
     # Start from last checkpoint
-    if exists(HACKERNEWS_TIMESTAMP):
+    if not IMPORT_ALL and exists(HACKERNEWS_TIMESTAMP):
         with open(HACKERNEWS_TIMESTAMP, encoding='utf-8') as input_file:
             previous_timestamp = pd.Timestamp(input_file.read())
         hackernews_df = hackernews_df[hackernews_df.index > previous_timestamp]
@@ -95,14 +105,13 @@ def main():
         day_df = day_df.assign(date=idx).set_index('date')
         dfs.append(day_df)
     hackernews_df = pd.concat(dfs)
-    storage_file = f'{STORAGE_DIR}/hackernews.pkl.gz'
-    if exists(storage_file):
+    if not IMPORT_ALL and exists(STORAGE_FILE):
         hackernews_df = pd.concat(
-            [pd.read_pickle(storage_file), hackernews_df])
+            [pd.read_pickle(STORAGE_FILE), hackernews_df])
     hackernews_df = sum_duplicates(hackernews_df)
     # Get rid of single phrases
     hackernews_df = hackernews_df[hackernews_df['count'] > 1]
-    hackernews_df.to_pickle(storage_file, compression='gzip')
+    hackernews_df.to_pickle(STORAGE_FILE, compression='gzip')
     with open(HACKERNEWS_TIMESTAMP, 'w', encoding='utf-8') as output_file:
         output_file.write(latest_timestamp_str)
 
