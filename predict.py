@@ -11,7 +11,6 @@ from sklearn import preprocessing
 
 
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
-PLOT_DIR = f'{Path.home()}/code/predictor/web'
 PREDICTIONS = f'{STORAGE_DIR}/predictions.pkl.gz'
 LOAD_MODEL = False
 PRINT_ONLY = False
@@ -24,7 +23,7 @@ def load_data():
     return (hackernews_df, stocks_df)
 
 
-def make_model():
+def make_model(up_to=None):
     """Make prediction model."""
     hackernews_df, stocks_df = load_data()
     # Need to create columns for all data, including predicted time.
@@ -34,16 +33,20 @@ def make_model():
     hackernews_df.index = hackernews_df.index + pd.Timedelta(1, unit='D')
     # Earliest known good data.
     hackernews_df = hackernews_df.loc['2022-10-13':]
+    # Restrict training data.
+    if up_to:
+        print(f'Making model up to {up_to}')
+        hackernews_df = hackernews_df.loc[:up_to]
     # Restrict training data to dates with known data in stocks.
     hackernews_df = hackernews_df.loc[hackernews_df.index.isin(
-        stocks_df.index)]
+        stocks_df.index.unique())]
     stocks_df = stocks_df.loc[stocks_df.index.isin(
         hackernews_df.index.unique())]
     stocks_df = stocks_df['regular_market_change_percent']
 
     multi_output_clf = LinearRegression()
     multi_output_clf.fit(preprocessing.scale(hackernews_df, axis=1), stocks_df)
-    if not PRINT_ONLY:
+    if not PRINT_ONLY and not up_to:
         dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
     return multi_output_clf
 
