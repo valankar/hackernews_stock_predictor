@@ -19,6 +19,7 @@ STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
 STORAGE_FILE = f'{STORAGE_DIR}/hackernews.pkl.gz'
 HACKERNEWS_TIMESTAMP = f'{STORAGE_DIR}/hackernews-timestamp.txt'
 STEAMPIPE = f'{Path.home()}/bin/steampipe'
+NGRAMS = (2, 3, 4)
 IMPORT_ALL = False
 
 STOPWORDS = [word.lower() for word in stopwords.words('english')]
@@ -59,11 +60,10 @@ def split_sentence(sentence):
     split_text = [word for word in text.split() if len(
         word) > 1 and word not in STOPWORDS]
     phrases = []
-    if len(split_text) < 2:
-        return phrases
-    for num in (2, 3, 4):
+    for num in NGRAMS:
         for grams in ngrams(split_text, num):
-            phrases.append(' '.join(grams))
+            if grams:
+                phrases.append(' '.join(grams))
     return phrases
 
 
