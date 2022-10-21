@@ -3,6 +3,7 @@
 
 import re
 import subprocess
+import warnings
 from datetime import datetime
 from os.path import exists
 from pathlib import Path
@@ -83,6 +84,7 @@ def main():
     hackernews_df.index = pd.DatetimeIndex(
         hackernews_df.index.strftime('%Y-%m-%d'))
     hackernews_df.index.name = 'date'
+    warnings.filterwarnings('ignore', category=UserWarning, module='bs4')
     hackernews_series = hackernews_df.apply(split_sentence, axis=1)
     hackernews_df = pd.DataFrame({'gram': hackernews_series}).explode('gram')
     dfs = []
