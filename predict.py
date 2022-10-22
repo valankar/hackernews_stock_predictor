@@ -22,8 +22,8 @@ def load_data():
     return (hackernews_df, stocks_df)
 
 
-def make_model(up_to=None):
-    """Make prediction model."""
+def prepare_dfs(up_to=None):
+    """Sanitize dfs for training."""
     hackernews_df, stocks_df = load_data()
     # Need to create columns for all data, including predicted time.
     hackernews_df = hackernews_df.pivot(columns='gram').fillna(0)
@@ -42,10 +42,15 @@ def make_model(up_to=None):
     stocks_df = stocks_df.loc[stocks_df.index.isin(
         hackernews_df.index.unique())]
     stocks_df = stocks_df['regular_market_change_percent']
+    return hackernews_df, stocks_df
 
+
+def make_model(up_to=None, save_model=False):
+    """Make prediction model."""
+    hackernews_df, stocks_df = prepare_dfs(up_to)
     multi_output_clf = LinearRegression()
     multi_output_clf.fit(hackernews_df, stocks_df)
-    if not PRINT_ONLY and not up_to:
+    if save_model:
         dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
     return multi_output_clf
 
@@ -55,7 +60,7 @@ def main():
     if LOAD_MODEL:
         multi_output_clf = load(f'{STORAGE_DIR}/model.joblib.gz')
     else:
-        multi_output_clf = make_model()
+        multi_output_clf = make_model(save_model=True)
     hackernews_df, stocks_df = load_data()
     stocks_df = stocks_df['regular_market_change_percent']
     hackernews_df = hackernews_df.pivot(columns='gram').fillna(0)
