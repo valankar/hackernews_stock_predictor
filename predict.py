@@ -7,7 +7,6 @@ from pathlib import Path
 import pandas as pd
 from joblib import dump, load
 from sklearn.linear_model import LinearRegression
-from sklearn import preprocessing
 
 
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
@@ -45,7 +44,7 @@ def make_model(up_to=None):
     stocks_df = stocks_df['regular_market_change_percent']
 
     multi_output_clf = LinearRegression()
-    multi_output_clf.fit(preprocessing.scale(hackernews_df, axis=1), stocks_df)
+    multi_output_clf.fit(hackernews_df, stocks_df)
     if not PRINT_ONLY and not up_to:
         dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
     return multi_output_clf
@@ -65,7 +64,7 @@ def main():
     yesterday_str = yesterday.strftime('%Y-%m-%d')
     today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
     predictions = multi_output_clf.predict(
-        preprocessing.scale(hackernews_df.loc[yesterday_str:yesterday_str], axis=1))
+        hackernews_df.loc[yesterday_str:yesterday_str])
     new_df = pd.DataFrame(
         columns=stocks_df.columns, data=predictions, index=[pd.Timestamp(today_str)])
     if exists(PREDICTIONS):

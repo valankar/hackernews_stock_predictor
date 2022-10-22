@@ -2,7 +2,6 @@
 """Re-run all predictions."""
 
 import pandas as pd
-from sklearn import preprocessing
 
 import predict
 
@@ -22,7 +21,7 @@ def main():
             break
         multi_output_clf = predict.make_model(up_to=day_str)
         prediction = multi_output_clf.predict(
-            preprocessing.scale(hackernews_df.loc[day_str:day_str], axis=1))
+            hackernews_df.loc[day_str:day_str])
         prediction_dfs.append(pd.DataFrame(
             columns=stocks_df.columns, data=prediction, index=[next_day]))
 
@@ -34,7 +33,7 @@ def main():
     # Remove any duplicate dates, keeping last.
     prediction_df = prediction_df[~prediction_df.index.duplicated(
         keep='last')]
-    print(prediction_df)
+    print(prediction_df[::-1])
     prediction_df.to_pickle(predict.PREDICTIONS)
 
 
