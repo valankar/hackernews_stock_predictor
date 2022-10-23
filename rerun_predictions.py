@@ -10,7 +10,6 @@ def main():
     """Main."""
     hackernews_df, stocks_df = predict.load_data()
     stocks_df = stocks_df['regular_market_change_percent']
-    hackernews_df = hackernews_df.pivot(columns='gram').fillna(0)
     hackernews_df = hackernews_df.loc['2022-10-13':]
     today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
     prediction_dfs = []
@@ -21,7 +20,7 @@ def main():
             break
         multi_output_clf = predict.make_model(up_to=day_str)
         prediction = multi_output_clf.predict(
-            hackernews_df.loc[day_str:day_str])
+            predict.vectorize(hackernews_df.loc[day_str:day_str]))
         prediction_dfs.append(pd.DataFrame(
             columns=stocks_df.columns, data=prediction, index=[next_day]))
 
