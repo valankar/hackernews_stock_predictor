@@ -63,7 +63,7 @@ def prepare_dfs(up_to=None):
 def make_model(up_to=None, save_model=False):
     """Make prediction model."""
     hackernews_df, stocks_df = prepare_dfs(up_to)
-    multi_output_clf = LinearRegression()
+    multi_output_clf = LinearRegression(n_jobs=-1)
     multi_output_clf.fit(hackernews_df, stocks_df)
     if save_model and not PRINT_ONLY:
         dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
