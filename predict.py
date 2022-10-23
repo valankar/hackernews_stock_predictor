@@ -27,7 +27,7 @@ def load_data():
 def vectorize(dataframe):
     """Hashing vectorize dataframe by day."""
     vectorizer = HashingVectorizer(
-        n_features=100000, lowercase=False, tokenizer=lambda x: x)
+        n_features=100000, lowercase=False, tokenizer=lambda x: [x])
     day_dfs = []
     for day in sorted(dataframe.index.unique()):
         # Duplicate all rows based on their count.
@@ -38,7 +38,7 @@ def vectorize(dataframe):
         day_df = pd.DataFrame(transformed.sum(axis=0), index=[day])
         day_dfs.append(day_df)
     final_df = pd.concat(day_dfs)
-    return preprocessing.scale(final_df, axis=1)
+    return preprocessing.scale(final_df)
 
 
 def prepare_dfs(up_to=None):
@@ -47,8 +47,6 @@ def prepare_dfs(up_to=None):
     # Increment days in hackernews, which will be matched with stocks for that day.
     # i.e. news from day before predicts stocks of current day
     hackernews_df.index = hackernews_df.index + pd.Timedelta(1, unit='D')
-    # Earliest known good data.
-    hackernews_df = hackernews_df.loc['2022-10-13':]
     # Restrict training data.
     if up_to:
         print(f'Making model up to {up_to}')

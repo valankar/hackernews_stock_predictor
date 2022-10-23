@@ -10,7 +10,6 @@ def main():
     """Main."""
     hackernews_df, stocks_df = predict.load_data()
     stocks_df = stocks_df['regular_market_change_percent']
-    hackernews_df = hackernews_df.loc['2022-10-13':]
     today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
     prediction_dfs = []
     for day in sorted(hackernews_df.index.unique()):
@@ -18,7 +17,10 @@ def main():
         next_day = day + pd.Timedelta(1, unit='D')
         if day_str == today_str:
             break
-        multi_output_clf = predict.make_model(up_to=day_str)
+        try:
+            multi_output_clf = predict.make_model(up_to=day_str)
+        except ValueError:
+            continue
         prediction = multi_output_clf.predict(
             predict.vectorize(hackernews_df.loc[day_str:day_str]))
         prediction_dfs.append(pd.DataFrame(
