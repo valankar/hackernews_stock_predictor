@@ -53,6 +53,7 @@ def get_stock_data():
     if exists(output_file):
         return output_file
     subprocess.run(
+        # pylint: disable=line-too-long
         f'''{STEAMPIPE} query "select regular_market_time, symbol, regular_market_price, regular_market_change_percent \
             from finance_quote where symbol in ({','.join([f"'{x}'" for x in TICKERS])}) order by symbol asc" --output csv > {output_file}''',
         shell=True, check=True)
@@ -66,6 +67,7 @@ def main():
     # Remove time component
     stocks_df.index = pd.DatetimeIndex(stocks_df.index.strftime('%Y-%m-%d'))
     stocks_df = stocks_df.pivot(columns='symbol')
+    stocks_df = stocks_df.dropna()
     storage_file = f'{STORAGE_DIR}/stocks.pkl.gz'
     if exists(storage_file):
         # Merge old data
