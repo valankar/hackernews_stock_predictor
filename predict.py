@@ -8,6 +8,7 @@ import pandas as pd
 from joblib import dump, load
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import scale
 
 
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
@@ -37,7 +38,7 @@ def vectorize(dataframe):
         day_df = pd.DataFrame(transformed.sum(axis=0), index=[day])
         day_dfs.append(day_df)
     final_df = pd.concat(day_dfs)
-    return final_df
+    return scale(final_df, axis=1)
 
 
 def prepare_dfs(up_to=None):
