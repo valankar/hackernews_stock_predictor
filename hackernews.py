@@ -114,6 +114,8 @@ def main():
     hackernews_df.to_pickle(STORAGE_FILE, compression='gzip')
     with open(HACKERNEWS_TIMESTAMP, 'w', encoding='utf-8') as output_file:
         output_file.write(latest_timestamp_str)
+    if len(csv_files) == 1:
+        subprocess.run(['gzip', csv_files[0]], check=True)
 
 
 if __name__ == '__main__':
