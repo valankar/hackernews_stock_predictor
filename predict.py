@@ -60,29 +60,30 @@ def prepare_dfs(up_to=None):
     return vectorize(hackernews_df), stocks_df
 
 
-def make_model(up_to=None, save_model=False):
+def make_model(up_to=None, save_model=False, hackernews_df=None, stocks_df=None):
     """Make prediction model."""
-    hackernews_df, stocks_df = prepare_dfs(up_to)
-    multi_output_clf = LinearRegression(n_jobs=-1)
-    multi_output_clf.fit(hackernews_df, stocks_df)
+    if hackernews_df is None or stocks_df is None:
+        hackernews_df, stocks_df = prepare_dfs(up_to)
+    clf = LinearRegression(n_jobs=-1)
+    clf.fit(hackernews_df, stocks_df)
     if save_model and not PRINT_ONLY:
-        dump(multi_output_clf, f'{STORAGE_DIR}/model.joblib.gz')
-    return multi_output_clf
+        dump(clf, f'{STORAGE_DIR}/model.joblib.gz')
+    return clf
 
 
 def main():
     """Main."""
     if LOAD_MODEL:
-        multi_output_clf = load(f'{STORAGE_DIR}/model.joblib.gz')
+        clf = load(f'{STORAGE_DIR}/model.joblib.gz')
     else:
-        multi_output_clf = make_model(save_model=True)
+        clf = make_model(save_model=True)
     hackernews_df, stocks_df = load_data()
     stocks_df = stocks_df['regular_market_change_percent']
 
     yesterday = pd.Timestamp.now() - pd.Timedelta(1, unit='D')
     yesterday_str = yesterday.strftime('%Y-%m-%d')
     today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
-    predictions = multi_output_clf.predict(
+    predictions = clf.predict(
         vectorize(hackernews_df.loc[yesterday_str:yesterday_str]))
     new_df = pd.DataFrame(
         columns=stocks_df.columns, data=predictions, index=[pd.Timestamp(today_str)])
