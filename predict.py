@@ -8,8 +8,7 @@ import pandas as pd
 from joblib import dump, load
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import scale
 
 
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
@@ -39,7 +38,7 @@ def vectorize(dataframe):
         day_df = pd.DataFrame(transformed.sum(axis=0), index=[day])
         day_dfs.append(day_df)
     final_df = pd.concat(day_dfs)
-    return final_df
+    return scale(final_df, axis=1)
 
 
 def prepare_dfs(up_to=None):
@@ -65,7 +64,7 @@ def make_model(up_to=None, save_model=False, hackernews_df=None, stocks_df=None)
     """Make prediction model."""
     if hackernews_df is None or stocks_df is None:
         hackernews_df, stocks_df = prepare_dfs(up_to)
-    clf = make_pipeline(StandardScaler(), LinearRegression(n_jobs=-1))
+    clf = LinearRegression(n_jobs=-1)
     clf.fit(hackernews_df, stocks_df)
     if save_model and not PRINT_ONLY:
         dump(clf, f'{STORAGE_DIR}/model.joblib.gz')
