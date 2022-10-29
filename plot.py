@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 import predict
+import train_test_split
 
 STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
 PLOT_DIR = f'{Path.home()}/code/predictor/web'
@@ -34,6 +35,8 @@ def plot_predictions():
     fig.update_yaxes(title_text='Percent')
     fig.update_xaxes(title_text='ETF')
 
+    mse, rmse = train_test_split.calculate()
+
     with open(f'{PLOT_DIR}/index.html', 'w', encoding='utf-8') as output_file:
         output_file.write(fig.to_html(full_html=True, include_plotlyjs='cdn'))
         output_file.write('<h2>Historical Percent Change</h2>')
@@ -47,6 +50,11 @@ def plot_predictions():
             f'<h2>Hackernews top phrases in comments for {yesterday_str}</h2>')
         hackernews_df.loc[yesterday_str].groupby(['gram']).sum().sort_values(
             by='count', ascending=False).head(30).to_html(output_file, float_format='%.0f')
+        output_file.write('<h2>Error</h2>')
+        output_file.write('<pre>')
+        output_file.write(f'Mean Squared Error: {mse:.3f}\n')
+        output_file.write(f'Root Mean Square Error: {rmse:.3f}\n')
+        output_file.write('</pre>')
 
 
 def main():
