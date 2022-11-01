@@ -29,7 +29,7 @@ def download_hackernews():
     """Download latest hackernews data."""
     today_str = datetime.now().strftime('%Y-%m-%d')
     output_file = f'{DOWNLOAD_DIR}/hackernews-{today_str}.csv'
-    if exists(output_file):
+    if exists(output_file) and Path(output_file).stat().st_size > 0:
         return output_file
     subprocess.run(
         # pylint: disable-next=line-too-long
