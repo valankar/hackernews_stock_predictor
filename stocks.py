@@ -67,7 +67,7 @@ def main():
     # Remove time component
     stocks_df.index = pd.DatetimeIndex(stocks_df.index.strftime('%Y-%m-%d'))
     stocks_df = stocks_df.pivot(columns='symbol')
-    stocks_df = stocks_df.dropna()
+    stocks_df = stocks_df.bfill().dropna()
     storage_file = f'{STORAGE_DIR}/stocks.pkl.gz'
     if exists(storage_file):
         # Merge old data
