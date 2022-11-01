@@ -19,10 +19,12 @@ def main():
             break
         try:
             multi_output_clf = predict.make_model(up_to=day_str)
-        except ValueError:
+        except ValueError as exc:
+            print(f'Value Error: {exc}')
             continue
         prediction = multi_output_clf.predict(
             predict.vectorize(hackernews_df.loc[day_str:day_str]))
+        print(f'Prediction: {prediction}')
         prediction_dfs.append(pd.DataFrame(
             columns=stocks_df.columns, data=prediction, index=[next_day]))
 
