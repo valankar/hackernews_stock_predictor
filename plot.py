@@ -14,6 +14,23 @@ PLOT_DIR = f'{Path.home()}/code/predictor/web'
 COLOR_GREEN = '#3d9970'
 COLOR_RED = '#ff4136'
 
+HTML_PRE = '''
+<html>
+  <link rel="stylesheet" type="text/css" href="df_style.css"/>
+  <body>
+'''
+
+HTML_POST = '''
+  </body>
+</html>.
+'''
+
+
+def write_table(output_file, dataframe, float_format):
+    """Output table with styling."""
+    dataframe.to_html(output_file, classes='mystyle',
+                      float_format=float_format)
+
 
 def plot_predictions():
     """Plot predictions."""
@@ -38,23 +55,32 @@ def plot_predictions():
     mse, rmse = train_test_split.calculate()
 
     with open(f'{PLOT_DIR}/index.html', 'w', encoding='utf-8') as output_file:
-        output_file.write(fig.to_html(full_html=True, include_plotlyjs='cdn'))
+        output_file.write(HTML_PRE)
+        output_file.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         output_file.write('<h2>Historical Percent Change</h2>')
-        stocks_df['regular_market_change_percent'].tail(30).iloc[::-1].to_html(
-            output_file, float_format='%.2f')
+        write_table(
+            output_file,
+            stocks_df['regular_market_change_percent'].tail(30).iloc[::-1],
+            float_format='%.2f')
         output_file.write(
             '<h2>Predictions Based On Linear Regression Model</h2>')
-        predictions_df.tail(
-            30).iloc[::-1].to_html(output_file, float_format='%.2f')
+        write_table(
+            output_file,
+            predictions_df.tail(30).iloc[::-1],
+            float_format='%.2f')
         output_file.write(
             f'<h2>Hackernews top phrases in comments for {yesterday_str}</h2>')
-        hackernews_df.loc[yesterday_str].groupby(['gram']).sum().sort_values(
-            by='count', ascending=False).head(30).to_html(output_file, float_format='%.0f')
+        write_table(
+            output_file,
+            hackernews_df.loc[yesterday_str].groupby(['gram']).sum().sort_values(
+                by='count', ascending=False).head(30),
+            float_format='%.0f')
         output_file.write('<h2>Error</h2>')
         output_file.write('<pre>')
         output_file.write(f'Mean Squared Error: {mse:.3f}\n')
         output_file.write(f'Root Mean Square Error: {rmse:.3f}\n')
         output_file.write('</pre>')
+        output_file.write(HTML_POST)
 
 
 def main():
