@@ -27,7 +27,7 @@ def load_data():
 def vectorize(dataframe):
     """Hashing vectorize dataframe by day."""
     vectorizer = HashingVectorizer(
-        n_features=100000, lowercase=False, tokenizer=lambda x: [x])
+        lowercase=False, tokenizer=lambda x: [x], alternate_sign=False)
     day_dfs = []
     for day in sorted(dataframe.index.unique()):
         # Duplicate all rows based on their count.
