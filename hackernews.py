@@ -55,7 +55,10 @@ def sum_duplicates(dataframe):
 
 def split_sentence(sentence):
     """Split a sentence into phrases."""
-    text = BeautifulSoup(sentence.text, features='html.parser').get_text()
+    try:
+        text = BeautifulSoup(sentence.text, features='html.parser').get_text()
+    except TypeError:
+        return []
     text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
     split_text = [word for word in text.split() if len(
         word) > 1 and word not in STOPWORDS]
