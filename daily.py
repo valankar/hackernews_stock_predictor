@@ -13,6 +13,7 @@ import stocks
 def retry_hackernews():
     """Get hackernews data with retries."""
     hackernews.main()
+    return True
 
 
 def main():
