@@ -1,29 +1,25 @@
-Steampipe
+# Hackernews Stock Predictor
 
-(hackernews + reddit + twitter) -> AI -> stock predictions
+The general idea of this is as follows:
 
-Look for 1, 2, 3 word phrases in top stories and see if correlation to stock price changes.
+Hackernews comments -> AI -> stock predictions
 
-"train"
-Look at words from 2 days ago, then stock price changes 1 day ago.
+Don't expect it to give any useful predictions :).
 
-Any site that lets you play with money and investing?
+## Details
 
-```shell
-steampipe query "select time, text  from hackernews_item where type='comment' order by time asc" --output csv
-```
+It uses [Steampipe](https://steampipe.io/) to download [Hackernews](https://hub.steampipe.io/plugins/turbot/hackernews)
+and [Yahoo Finance](https://hub.steampipe.io/plugins/turbot/finance) data.
 
-```python
+Only Hackernews comments are used. These comments are split up into 2+ word n-grams.
 
-# HashingVectorizer
-new_df, _ = load_data()
-# new_df = hackernews_df.reset_index()
-# Explode rows by counts
-# new_df = new_df.loc[new_df.index.repeat(new_df['count'].astype(int))].drop(columns='count').set_index('date')
+Linear regression is used to correlate the frequency of these n-grams over 1 day to
+percentage stock price changes on that day. A prediction is then made for the following day.
 
-hv = HashingVectorizer(n_features=10)
-vector = hv.transform(new_df['gram'])
-sdf = pd.DataFrame.sparse.from_spmatrix(vector, index=new_df.index)
-sdf = sdf.multiply(new_df['count'], axis='index')
-sdf = sdf.groupby(sdf.index).sum()
-```
+See [this](web/example_index.html) for an example generated output.
+
+See [conda.export](conda.export) for packages needed.
+
+## Files
+
+[daily.py](daily.py) is the main script that is run daily.
