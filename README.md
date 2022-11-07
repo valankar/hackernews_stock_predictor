@@ -22,7 +22,7 @@ See [conda.export](conda.export) for packages needed.
 
 ![Predictions Graph](examples/prediction_graph.jpg)
 ![Historical Percent Change](examples/historical_percent_change.jpg)
-![Predictions Table](examples/predictions.jpg)
+![Predictions Table](examples/predictions_table.jpg)
 ![Comments](examples/comments.jpg)
 
 ## Files
