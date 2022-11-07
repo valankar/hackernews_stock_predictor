@@ -16,9 +16,14 @@ Only Hackernews comments are used. These comments are split up into 2+ word n-gr
 Linear regression is used to correlate the frequency of these n-grams over 1 day to
 percentage stock price changes on that day. A prediction is then made for the following day.
 
-See [this](web/example_index.html) for an example generated output.
-
 See [conda.export](conda.export) for packages needed.
+
+## Examples
+
+![Predictions Graph](examples/prediction_graph.jpg)
+![Historical Percent Change](examples/historical_percent_change.jpg)
+![Predictions Table](examples/predictions.jpg)
+![Comments](examples/comments.jpg)
 
 ## Files
 
