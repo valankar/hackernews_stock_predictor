@@ -27,10 +27,15 @@ HTML_POST = '''
 '''
 
 
-def write_table(output_file, dataframe, float_format='%.2f'):
+def write_table_css(output_file, dataframe, float_format='%.2f'):
     """Output table with styling."""
     dataframe.to_html(output_file, classes='mystyle',
                       float_format=float_format)
+
+
+def write_table_direct(output_file, dataframe):
+    """Output table without using css."""
+    dataframe.to_html(output_file)
 
 
 def plot_predictions():
@@ -59,23 +64,25 @@ def plot_predictions():
         output_file.write(HTML_PRE)
         output_file.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         output_file.write('<h2>Historical Percent Change</h2>')
-        write_table(
+        write_table_css(
             output_file,
             stocks_df['regular_market_change_percent'].tail(NUM_ROWS).iloc[::-1])
         output_file.write(
             '<h2>Predictions Based On Linear Regression Model</h2>')
-        write_table(
+        write_table_css(
             output_file,
             predictions_df.tail(NUM_ROWS).iloc[::-1])
         output_file.write(
-            '<h2>Difference between actual and prediction</h2>')
-        write_table(
-            output_file,
-            (stocks_df - predictions_df)['regular_market_change_percent'].dropna().tail(
-                NUM_ROWS).iloc[::-1])
+            '<h2>Difference between actual and prediction (lighter is better)</h2>')
+        diff_df = (stocks_df - predictions_df)['regular_market_change_percent']
+        diff_df.index = diff_df.index.strftime('%Y-%m-%d')
+        diff_df = diff_df.abs().dropna().tail(NUM_ROWS).iloc[
+            ::-1].style.background_gradient(axis=None, cmap='gist_heat_r').format(
+                '{:.3f}')
+        write_table_direct(output_file, diff_df)
         output_file.write(
             f'<h2>Hackernews top phrases in comments for {yesterday_str}</h2>')
-        write_table(
+        write_table_css(
             output_file,
             hackernews_df.loc[yesterday_str].groupby(['gram']).sum().sort_values(
                 by='count', ascending=False).head(NUM_ROWS),
