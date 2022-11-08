@@ -21,8 +21,13 @@ See [conda.export](conda.export) for packages needed.
 ## Examples
 
 ![Predictions Graph](examples/prediction_graph.jpg)
+
 ![Historical Percent Change](examples/historical_percent_change.jpg)
+
 ![Predictions Table](examples/predictions_table.jpg)
+
+![Difference](examples/difference.jpg)
+
 ![Comments](examples/comments.jpg)
 
 ## Files

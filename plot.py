@@ -13,6 +13,7 @@ STORAGE_DIR = f'{Path.home()}/code/predictor/storage'
 PLOT_DIR = f'{Path.home()}/code/predictor/web'
 COLOR_GREEN = '#3d9970'
 COLOR_RED = '#ff4136'
+NUM_ROWS = 30
 
 HTML_PRE = '''
 <html>
@@ -26,7 +27,7 @@ HTML_POST = '''
 '''
 
 
-def write_table(output_file, dataframe, float_format):
+def write_table(output_file, dataframe, float_format='%.2f'):
     """Output table with styling."""
     dataframe.to_html(output_file, classes='mystyle',
                       float_format=float_format)
@@ -60,20 +61,24 @@ def plot_predictions():
         output_file.write('<h2>Historical Percent Change</h2>')
         write_table(
             output_file,
-            stocks_df['regular_market_change_percent'].tail(30).iloc[::-1],
-            float_format='%.2f')
+            stocks_df['regular_market_change_percent'].tail(NUM_ROWS).iloc[::-1])
         output_file.write(
             '<h2>Predictions Based On Linear Regression Model</h2>')
         write_table(
             output_file,
-            predictions_df.tail(30).iloc[::-1],
-            float_format='%.2f')
+            predictions_df.tail(NUM_ROWS).iloc[::-1])
+        output_file.write(
+            '<h2>Difference between actual and prediction</h2>')
+        write_table(
+            output_file,
+            (stocks_df - predictions_df)['regular_market_change_percent'].dropna().tail(
+                NUM_ROWS).iloc[::-1])
         output_file.write(
             f'<h2>Hackernews top phrases in comments for {yesterday_str}</h2>')
         write_table(
             output_file,
             hackernews_df.loc[yesterday_str].groupby(['gram']).sum().sort_values(
-                by='count', ascending=False).head(30),
+                by='count', ascending=False).head(NUM_ROWS),
             float_format='%.0f')
         output_file.write('<h2>Error</h2>')
         output_file.write('<pre>')
